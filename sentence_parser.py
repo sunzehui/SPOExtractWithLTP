@@ -1,19 +1,13 @@
-#!/usr/bin/env python3
-# coding: utf-8
-# File: sentence_parser.py
-# Author: lhy<lhy_in_blcu@126.com,https://huangyong.github.io>
-# Date: 18-3-10
-
 import os
 from pyltp import Segmentor, Postagger, Parser, NamedEntityRecognizer, SementicRoleLabeller
 class LtpParser:
     def __init__(self):
-        LTP_DIR = "./ltp_data"
+        LTP_DIR = "./ltp_data/"
         self.segmentor = Segmentor()
-        self.segmentor.load(os.path.join(LTP_DIR, "cws.model"))
+        self.segmentor.load_with_lexicon(os.path.join(LTP_DIR, "cws.model"),os.path.join(LTP_DIR, "user_dict.txt"))
 
         self.postagger = Postagger()
-        self.postagger.load(os.path.join(LTP_DIR, "pos.model"))
+        self.postagger.load_with_lexicon(os.path.join(LTP_DIR, "pos.model"),os.path.join(LTP_DIR, "user_dict.txt"))
 
         self.parser = Parser()
         self.parser.load(os.path.join(LTP_DIR, "parser.model"))
@@ -22,7 +16,7 @@ class LtpParser:
         self.recognizer.load(os.path.join(LTP_DIR, "ner.model"))
 
         self.labeller = SementicRoleLabeller()
-        self.labeller.load(os.path.join(LTP_DIR, 'pisrl.model'))
+        self.labeller.load(os.path.join(LTP_DIR, 'pisrl_win.model'))
 
     '''语义角色标注'''
     def format_labelrole(self, words, postags):
@@ -51,7 +45,7 @@ class LtpParser:
         relation = [arc.relation for arc in arcs]  # 提取依存关系
         heads = ['Root' if id == 0 else words[id - 1] for id in rely_id]  # 匹配依存父节点词语
         for i in range(len(words)):
-            # ['ATT', '李克强', 0, 'nh', '总理', 1, 'n']
+            # ['ATT', '***', 0, 'nh', '总理', 1, 'n']
             a = [relation[i], words[i], i, postags[i], heads[i], rely_id[i]-1, postags[rely_id[i]-1]]
             format_parse_list.append(a)
 
@@ -69,7 +63,7 @@ class LtpParser:
 
 if __name__ == '__main__':
     parse = LtpParser()
-    sentence = '李克强总理今天来我家了,我感到非常荣幸'
+    sentence = '中国是一个自由、和平的国家'
     words, postags, child_dict_list, roles_dict, format_parse_list = parse.parser_main(sentence)
     print(words, len(words))
     print(postags, len(postags))
